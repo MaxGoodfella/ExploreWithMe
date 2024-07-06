@@ -4,6 +4,21 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+
+HELP*.class
+    *.log
+    *.jar
+    *.war
+    *.nar
+    *.ear
+    *.zip
+    *.tar.gz
+    *.rar
+    hs_err_pid*
+    out/
+    .db
+
+
 ### STS ###
 .apt_generated
 .classpath
@@ -31,3 +46,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+db/*.DS_Store
+*.DS_Store

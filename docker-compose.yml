@@ -1,15 +1,62 @@
 version: '3.1'
 services:
   stats-server:
+    build:
+      context: ./stat-service/stat_server
+    image: stats
+    container_name: explore-with-me-stats
+    depends_on:
+      - stats-db
     ports:
       - "9090:9090"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ExploreWithMeStats
+      - SPRING_DATASOURCE_USERNAME=explore
+      - SPRING_DATASOURCE_PASSWORD=explore
 
   stats-db:
     image: postgres:14-alpine
+    container_name: explore-with-me-stats-db
+    ports:
+      - "6541:5432"
+    environment:
+      - POSTGRES_DB=ExploreWithMeStats
+      - POSTGRES_USER=explore
+      - POSTGRES_PASSWORD=explore
+      - LANG=C.UTF-8
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
 
   ewm-service:
+    build:
+      context: ./main-service
+    image: ewm
+    container_name: explore-with-me-ewm
     ports:
       - "8080:8080"
+    depends_on:
+      - ewm-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ExploreWithMe
+      - SPRING_DATASOURCE_USERNAME=explore
+      - SPRING_DATASOURCE_PASSWORD=explore
+      - STATS_SERVER_URL=http://server:9090
 
   ewm-db:
     image: postgres:14-alpine
+    container_name: explore-with-me-db
+    ports:
+      - "6542:5432"
+    environment:
+      - POSTGRES_DB=ExploreWithMe
+      - POSTGRES_USER=explore
+      - POSTGRES_PASSWORD=explore
+      - LANG=C.UTF-8
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
