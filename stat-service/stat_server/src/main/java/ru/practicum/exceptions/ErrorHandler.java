@@ -18,4 +18,11 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleThrowable(Throwable e) {
+        log.debug("Получен статус 500 Internal Server Error {}", e.getMessage(), e);
+        return new ErrorResponse("Произошла непредвиденная ошибка.", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }
