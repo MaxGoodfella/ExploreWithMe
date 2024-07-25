@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotEmpty;
-
 
 @Getter
 @AllArgsConstructor
@@ -14,10 +12,8 @@ import javax.validation.constraints.NotEmpty;
 @Builder
 public class StatsViewDto {
 
-    @NotEmpty
     private String app;
 
-    @NotEmpty
     private String uri;
 
     private long hits;

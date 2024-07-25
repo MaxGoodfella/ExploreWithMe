@@ -7,7 +7,6 @@ import ru.practicum.StatsDto;
 import ru.practicum.StatsViewDto;
 import ru.practicum.mapper.StatsMapper;
 import ru.practicum.repository.StatsRepository;
-import ru.practicum.timeformatvalidation.TimeFormatValidator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,8 +19,6 @@ public class StatsServiceImpl implements StatsService {
 
     private final StatsRepository statsRepository;
 
-    private final TimeFormatValidator timeFormatValidator;
-
 
     @Transactional
     @Override
@@ -30,25 +27,21 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public List<StatsViewDto> getStatistics(String start, String end, List<String> uris, Boolean unique) {
+    public List<StatsViewDto> getStatistics(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
 
-        LocalDateTime startTime = timeFormatValidator.parseToLocalDateTime(start);
-        LocalDateTime endTime = timeFormatValidator.parseToLocalDateTime(end);
-        List<StatsViewDto> dtos;
-
-        if (uris != null) {
-            if (unique) {
-                dtos = statsRepository.findAllByTimeAndListOfUrisAndUniqueIp(startTime, endTime, uris);
+            if (uris.isEmpty()) {
+                if (unique) {
+                    return statsRepository.findStatsUniqueIp(start, end);
+                } else {
+                    return statsRepository.findStats(start, end);
+                }
             } else {
-                dtos = statsRepository.findAllByTimeAndListOfUris(startTime, endTime, uris);
+                if (unique) {
+                    return statsRepository.findStatsByUriUniqueIp(uris, start, end);
+                } else {
+                    return statsRepository.findStatsByUri(uris, start, end);
+                }
             }
-        } else if (unique) {
-            dtos = statsRepository.findAllByTimeAndUniqueIp(startTime, endTime);
-        } else {
-            dtos = statsRepository.findAllByTime(startTime, endTime);
-        }
-
-        return dtos;
 
     }
 
