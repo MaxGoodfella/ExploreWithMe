@@ -11,12 +11,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.event.dto.EventAdmin;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.model.enums.EventStatus;
 import ru.practicum.event.service.EventService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,11 +44,13 @@ public class AdminEventController {
                                                   LocalDateTime rangeStart,
                                               @RequestParam(required = false) @DateTimeFormat(pattern = TIME_FORMAT)
                                                   LocalDateTime rangeEnd,
-                                              @RequestParam(required = false, defaultValue = "0") Long from,
-                                              @RequestParam(required = false, defaultValue = "10") Long size) {
+                                              @RequestParam(required = false, defaultValue = "0") @PositiveOrZero
+                                                  Long from,
+                                              @RequestParam(required = false, defaultValue = "10") @Positive
+                                                  Long size) {
         log.info("Start fetching events by different parameters");
-        List<EventFullDto> events = eventService.findListByAdmin(users, states, categories, rangeStart, rangeEnd,
-                from, size);
+        EventAdmin eventAdminParams = new EventAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        List<EventFullDto> events = eventService.findListByAdmin(eventAdminParams);
         log.info("Finish fetching events by different parameters");
         return events;
     }

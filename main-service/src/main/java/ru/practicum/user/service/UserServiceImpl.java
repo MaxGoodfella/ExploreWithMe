@@ -38,8 +38,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getList(List<Long> ids, Integer from, Integer size) {
-        PageRequest page = PageRequest.of(from / size, size);
+    public List<UserDto> getList(List<Long> ids, Long from, Long size) {
+        PageRequest page = PageRequest.of(Math.toIntExact(from / size), Math.toIntExact(size));
         Stream<User> usersStream =
                 (ids != null) ? userRepository.findByIdIn(ids, page).stream() : userRepository.findAll(page).stream();
 

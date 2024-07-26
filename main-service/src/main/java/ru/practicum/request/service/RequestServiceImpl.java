@@ -18,6 +18,7 @@ import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -48,12 +49,12 @@ public class RequestServiceImpl implements RequestService {
                     "Заявка на участие пользователя с id " + userId + " в событии с id " + eventId + " уже существует");
         }
 
-        if (userId.equals(event.getInitiator().getId())) {
+        if (Objects.equals(userId, event.getInitiator().getId())) {
             throw new DataConflictException(User.class, String.valueOf(userId),
                     "Пользователь с id = " + userId + " является инициатором события");
         }
 
-        if (!event.getState().equals(EventStatus.PUBLISHED)) {
+        if (event.getState() != EventStatus.PUBLISHED) {
             throw new DataConflictException(EventStatus.class, String.valueOf(eventId),
                     "Данное событие ещё не опубликовано");
         }

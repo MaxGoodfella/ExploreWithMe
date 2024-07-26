@@ -12,9 +12,9 @@ import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exceptions.DataConflictException;
 import ru.practicum.exceptions.EntityNotFoundException;
-import ru.practicum.paginationvalidation.PaginationValidator;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -26,8 +26,6 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     private final EventRepository eventRepository;
-
-    private final PaginationValidator paginationValidator;
 
 
     @Override
@@ -67,7 +65,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException(Category.class, String.valueOf(categoryId),
                         "Категория с id = " + categoryId + " не найдена."));
 
-        if (!category.getName().equals(categoryDto.getName()) && categoryRepository.existsByName(categoryDto.getName())) {
+        if (!Objects.equals(category.getName(), categoryDto.getName()) && categoryRepository.existsByName(categoryDto.getName())) {
             throw new DataConflictException(CategoryDto.class, String.valueOf(categoryDto.getId()),
                     "Категория с name = " + categoryDto.getName() + " уже существует");
         }
@@ -78,9 +76,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> findList(Integer from, Integer size) {
-        paginationValidator.validateSearchParameters(from, size);
-        PageRequest pageRequest = PageRequest.of(from / size, size);
+    public List<CategoryDto> findList(Long from, Long size) {
+        PageRequest pageRequest = PageRequest.of(Math.toIntExact(from / size), Math.toIntExact(size));
         return categoryRepository.findAll(pageRequest)
                 .stream().map(CategoryMapper::toCategoryDto).collect(Collectors.toList());
     }

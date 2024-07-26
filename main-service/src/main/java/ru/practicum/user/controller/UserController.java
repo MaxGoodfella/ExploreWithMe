@@ -44,8 +44,8 @@ public class UserController {
 
     @GetMapping
     public List<UserDto> getList(@RequestParam(required = false) List<Long> ids,
-                                 @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                 @RequestParam(defaultValue = "10") @Positive Integer size) {
+                                 @RequestParam(defaultValue = "0") @PositiveOrZero Long from,
+                                 @RequestParam(defaultValue = "10") @Positive Long size) {
         log.info("Start fetching users with ids = [{}]", ids);
         List<UserDto> fetchedUsers = userService.getList(ids, from, size);
         log.info("Finish fetching users with ids = [{}]", ids);

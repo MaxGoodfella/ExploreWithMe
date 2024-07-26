@@ -25,8 +25,8 @@ public class PublicCategoryController {
 
 
     @GetMapping
-    public List<CategoryDto> findList(@RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                      @RequestParam(defaultValue = "10") @Positive Integer size) {
+    public List<CategoryDto> findList(@RequestParam(defaultValue = "0") @PositiveOrZero Long from,
+                                      @RequestParam(defaultValue = "10") @Positive Long size) {
         log.info("Start fetching categories with parameters: from = {} and size = {}", from, size);
         List<CategoryDto> fetchedCategories = categoryService.findList(from, size);
         log.info("Finish fetching categories with parameters: from = {} and size = {}", from, size);

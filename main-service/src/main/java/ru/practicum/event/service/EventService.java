@@ -1,18 +1,17 @@
 package ru.practicum.event.service;
 
+import ru.practicum.event.dto.EventAdmin;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventNewDto;
 import ru.practicum.event.dto.EventShortDto;
+import ru.practicum.event.dto.EventUser;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.dto.UpdateEventUserRequest;
-import ru.practicum.event.model.enums.EventSort;
-import ru.practicum.event.model.enums.EventStatus;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -21,13 +20,7 @@ public interface EventService {
     EventFullDto adminUpdate(Long eventId,
                              UpdateEventAdminRequest eventUpdate);
 
-    List<EventFullDto> findListByAdmin(List<Long> users,
-                                       List<EventStatus> states,
-                                       List<Long> categories,
-                                       LocalDateTime rangeStart,
-                                       LocalDateTime rangeEnd,
-                                       Long from,
-                                       Long size);
+    List<EventFullDto> findListByAdmin(EventAdmin eventAdminParams);
 
     EventFullDto addEvent(Long userId, EventNewDto newEventDto);
 
@@ -43,16 +36,7 @@ public interface EventService {
                                                         Long eventId,
                                                         EventRequestStatusUpdateRequest requestStatusUpdateRequest);
 
-    List<EventShortDto> findEvents(String text,
-                                   List<Long> categories,
-                                   Boolean paid,
-                                   LocalDateTime rangeStart,
-                                   LocalDateTime rangeEnd,
-                                   Boolean onlyAvailable,
-                                   EventSort sort,
-                                   Integer from,
-                                   Integer size,
-                                   HttpServletRequest request);
+    List<EventShortDto> findEvents(EventUser eventUserParams, HttpServletRequest request);
 
     EventFullDto findEventById(Long eventId, HttpServletRequest request);
 

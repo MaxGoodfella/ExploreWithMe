@@ -11,10 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
+import ru.practicum.event.dto.EventUser;
 import ru.practicum.event.model.enums.EventSort;
 import ru.practicum.event.service.EventService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,12 +44,13 @@ public class PublicEventController {
                                               LocalDateTime rangeEnd,
                                           @RequestParam(required = false) Boolean onlyAvailable,
                                           @RequestParam(required = false) EventSort sort,
-                                          @RequestParam(required = false, defaultValue = "0") Integer from,
-                                          @RequestParam(required = false, defaultValue = "10") Integer size,
+                                          @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Long from,
+                                          @RequestParam(required = false, defaultValue = "10") @Positive Long size,
                                           HttpServletRequest request) {
         log.info("Start fetching events with many search parameters");
-        List<EventShortDto> fetchedEvents = eventService.findEvents(text, categories, paid, rangeStart, rangeEnd,
-                onlyAvailable, sort, from, size, request);
+        EventUser eventUserParams =
+                new EventUser(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+        List<EventShortDto> fetchedEvents = eventService.findEvents(eventUserParams, request);
         log.info("Finish fetching events with many search parameters");
         return fetchedEvents;
     }

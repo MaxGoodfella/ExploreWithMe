@@ -12,9 +12,11 @@ import ru.practicum.StatsDto;
 import ru.practicum.StatsViewDto;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
+import ru.practicum.event.dto.EventAdmin;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventNewDto;
 import ru.practicum.event.dto.EventShortDto;
+import ru.practicum.event.dto.EventUser;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.mapper.EventMapperMapstruct;
@@ -80,13 +82,15 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
-    public List<EventFullDto> findListByAdmin(List<Long> users,
-                                              List<EventStatus> states,
-                                              List<Long> categories,
-                                              LocalDateTime rangeStart,
-                                              LocalDateTime rangeEnd,
-                                              Long from,
-                                              Long size) {
+    public List<EventFullDto> findListByAdmin(EventAdmin eventAdminParams) {
+
+        List<Long> users = eventAdminParams.getUsers();
+        List<EventStatus> states = eventAdminParams.getStates();
+        List<Long> categories = eventAdminParams.getCategories();
+        LocalDateTime rangeStart = eventAdminParams.getRangeStart();
+        LocalDateTime rangeEnd = eventAdminParams.getRangeEnd();
+        Long from = eventAdminParams.getFrom();
+        Long size = eventAdminParams.getSize();
 
         int page = (int) (from / size);
         Pageable pageable = PageRequest.of(page, size.intValue());
@@ -395,12 +399,12 @@ public class EventServiceImpl implements EventService {
             }
 
             for (Request request : requests) {
-                if (!request.getStatus().equals(RequestStatus.PENDING)) {
+                if (request.getStatus() != RequestStatus.PENDING) {
                     throw new DataConflictException(Event.class, String.valueOf(eventId),
                             "Запрос должен иметь статус PENDING");
                 }
 
-                if (requestStatusUpdate.getStatus().equals(RequestStatus.REJECTED) || requestCountToLimit == 0) {
+                if (requestStatusUpdate.getStatus() == RequestStatus.REJECTED) {
                     request.setStatus(RequestStatus.REJECTED);
                     rejectedRequests.add(requestMapper.modelToDto(requestRepository.save(request)));
                 } else {
@@ -418,19 +422,20 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> findEvents(String text,
-                                          List<Long> categories,
-                                          Boolean paid,
-                                          LocalDateTime rangeStart,
-                                          LocalDateTime rangeEnd,
-                                          Boolean onlyAvailable,
-                                          EventSort sort,
-                                          Integer from,
-                                          Integer size,
-                                          HttpServletRequest request) {
+    public List<EventShortDto> findEvents(EventUser eventUserParams, HttpServletRequest request) {
 
-        int page = (from / size);
-        Pageable pageable = PageRequest.of(page, size);
+        String text = eventUserParams.getText();
+        List<Long> categories = eventUserParams.getCategories();
+        Boolean paid = eventUserParams.getPaid();
+        LocalDateTime rangeStart = eventUserParams.getRangeStart();
+        LocalDateTime rangeEnd = eventUserParams.getRangeEnd();
+        Boolean onlyAvailable = eventUserParams.getOnlyAvailable();
+        EventSort sort = eventUserParams.getSort();
+        Long from  = eventUserParams.getFrom();
+        Long size = eventUserParams.getSize();
+
+        int page = (int) (from / size);
+        Pageable pageable = PageRequest.of(page, Math.toIntExact(size));
 
         if (rangeEnd != null && rangeStart != null && rangeEnd.isBefore(rangeStart)) {
             throw new BadRequestException(LocalDateTime.class, "", "Некорректные параметры времени начала и/или конца");
@@ -476,7 +481,7 @@ public class EventServiceImpl implements EventService {
                 () -> new EntityNotFoundException(Event.class, String.valueOf(eventId),
                         "Событие с id = " + eventId + " не найдено."));
 
-        if (!event.getState().equals(EventStatus.PUBLISHED)) {
+        if (event.getState() != EventStatus.PUBLISHED) {
             throw new EntityNotFoundException(Event.class, String.valueOf(eventId),
                     "Событие с id = " + eventId + " не опубликовано");
         }
@@ -508,7 +513,7 @@ public class EventServiceImpl implements EventService {
         Map<Long, Long> eventViews = new HashMap<>();
 
         for (StatsViewDto view : views) {
-            if (view.getUri().equals("/events")) {
+            if (Objects.equals(view.getUri(), "/events")) {
                 continue;
             }
             Long eventId = Long.parseLong(view.getUri().substring("/events".length() + 1));

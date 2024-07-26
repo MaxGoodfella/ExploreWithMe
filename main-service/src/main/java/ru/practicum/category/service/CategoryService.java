@@ -14,7 +14,7 @@ public interface CategoryService {
 
     CategoryDto update(Long categoryId, CategoryDto categoryDto);
 
-    List<CategoryDto> findList(Integer from, Integer size);
+    List<CategoryDto> findList(Long from, Long size);
 
     CategoryDto findById(Long categoryId);
 

@@ -10,7 +10,7 @@ public interface UserService {
 
     UserDto add(UserNewRequestDto newUserRequest);
 
-    List<UserDto> getList(List<Long> ids, Integer from, Integer size);
+    List<UserDto> getList(List<Long> ids, Long from, Long size);
 
     void delete(Long userId);
 
