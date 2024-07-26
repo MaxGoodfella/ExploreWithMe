@@ -50,15 +50,15 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     @Query("SELECT COUNT(r.id) FROM Request r WHERE r.event.id = :eventId AND r.status = 'CONFIRMED'")
     Integer countConfirmedRequestsByEventId(@Param("eventId") Long eventId);
 
-    @Query("select e from Event e " +
-            "where (:text is null or ((lower(e.annotation) like lower(concat('%',:text,'%'))) or (lower(e.description) like lower(concat('%',:text,'%'))))) " +
-            "and e.category.id in (:categories) " +
-            "and (cast(:paid as boolean) is null or e.paid = :paid) " +
-            "and e.eventDate > cast(:start as timestamp) " +
-            "and (cast(:end as timestamp) is null or e.eventDate < cast(:end as timestamp)) " +
-            "and e.state = 'PUBLISHED' " +
-            "and (cast(:onlyAvailable as boolean) = false or e.participantLimit = 0 " +
-            "or e.participantLimit > (select count(r) from Request r where r.event.id = e.id and r.status = 'CONFIRMED'))")
+    @Query("SELECT e FROM Event e " +
+            "WHERE (:text IS NULL OR ((lower(e.annotation) LIKE lower(concat('%',:text,'%'))) OR (lower(e.description) LIKE lower(concat('%',:text,'%'))))) " +
+            "AND e.category.id IN (:categories) " +
+            "AND (cast(:paid as boolean) IS NULL OR e.paid = :paid) " +
+            "AND e.eventDate > cast(:start as timestamp) " +
+            "AND (cast(:end as timestamp) IS NULL OR e.eventDate < cast(:end as timestamp )) " +
+            "AND e.state = 'PUBLISHED' " +
+            "AND (cast(:onlyAvailable as boolean) = FALSE OR e.participantLimit = 0 " +
+            "OR e.participantLimit > (SELECT COUNT(r) FROM Request r WHERE r.event.id = e.id AND r.status = 'CONFIRMED'))")
     Page<Event> search(@Param("text") String text,
                        @Param("categories") List<Long> categories,
                        @Param("paid") Boolean paid,
