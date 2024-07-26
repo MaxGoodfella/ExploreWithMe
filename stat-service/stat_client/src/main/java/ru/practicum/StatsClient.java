@@ -3,41 +3,66 @@ package ru.practicum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 
 
 @Service
-public class StatsClient extends BaseClient {
+public class StatsClient {
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private final RestTemplate restTemplate;
+
 
     @Autowired
     public StatsClient(@Value("${stat_server.url}") String serviceUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serviceUrl + ""))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build()
-        );
+        this.restTemplate = builder
+                .uriTemplateHandler(new DefaultUriBuilderFactory(serviceUrl))
+                .requestFactory(HttpComponentsClientHttpRequestFactory::new)
+                .build();
     }
 
 
-    public ResponseEntity<Object> postHit(StatsDto inDto) {
-        return post("/hit", inDto);
+    public void hit(StatsDto request) {
+        restTemplate.postForObject("/hit", request, Void.class);
     }
 
-    public ResponseEntity<Object> getStatistics(String start, String end, List<String> uris, Boolean unique) {
-        Map<String, Object> params = Map.of(
-                "start", start,
-                "end", end,
-                "uris", uris,
-                "unique", unique
+    public List<StatsViewDto> getStatistics(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+        String formattedStart = start.format(formatter);
+        String formattedEnd = end.format(formatter);
+
+        StringBuilder urlBuilder = new StringBuilder("/stats?");
+        urlBuilder.append("start=").append(formattedStart);
+        urlBuilder.append("&end=").append(formattedEnd);
+        urlBuilder.append("&unique=").append(unique);
+
+        if (uris != null && !uris.isEmpty()) {
+            for (String uri : uris) {
+                urlBuilder.append("&uris=").append(uri);
+            }
+        }
+
+        String url = urlBuilder.toString();
+
+        ResponseEntity<List<StatsViewDto>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                }
         );
-        return get("/stats?start={start}&end={end}&uris=uris&unique={unique}", params);
+
+        return response.getBody();
     }
 
 }

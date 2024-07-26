@@ -3,12 +3,13 @@ package ru.practicum.service;
 import ru.practicum.StatsDto;
 import ru.practicum.StatsViewDto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface StatsService {
 
-    void postHit(StatsDto inDto);
+    void postHit(StatsDto statsDto);
 
-    List<StatsViewDto> getStatistics(String start, String end, List<String> uris, Boolean unique);
+    List<StatsViewDto> getStatistics(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique);
 
 }
